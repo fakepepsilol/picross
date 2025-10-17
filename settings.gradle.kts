@@ -11,4 +11,3 @@ plugins {
 }
 
 rootProject.name = "picross"
-include("app")
