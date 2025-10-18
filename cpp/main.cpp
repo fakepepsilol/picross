@@ -39,13 +39,23 @@ int main(){
     unsigned char outBuffer[129]{0};
     strm->next_out = outBuffer;
     strm->avail_out = 128;
+    
+    {
+      int ret = inflateInit2(strm, -MAX_WBITS);
+      if(ret != Z_OK){
+        std::cout << "inflateInit returned: " << ret << "\n";
+        return 0;
+      }
+    }
 
-
-    std::cout << "inflateInit returned: " << inflateInit2(strm, -MAX_WBITS) << "\n";
     int ret = 0;
     std::string ans;
     do{
         ret = inflate(strm, Z_NO_FLUSH);
+        if(ret != Z_STREAM_END && ret != Z_OK){
+          std::cout << "failed. (inflate returned: " << ret << ")\n";
+          return 0;
+        }
 
         ans += reinterpret_cast<const char*>(outBuffer);
         memset(outBuffer, 0, sizeof(outBuffer));
@@ -54,7 +64,7 @@ int main(){
         strm->avail_out = 128;
     }while(ret != Z_STREAM_END);
     
-    std::cout << "decoded: " << strm->total_out << "\n";
+    // std::cout << "decoded: " << strm->total_out << "\n";
     std::cout << ans;
 
     return 0;
